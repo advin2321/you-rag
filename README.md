@@ -1,112 +1,122 @@
-# YouTube 💬 Chat (Lightweight Video RAG)
-![YouTube Chat](assets/youtube-rag.jpg)
 
-YouTube 💬 Chat is a Flask-based web application that allows users to ask questions about the content of YouTube videos and receive timestamped YouTube links to the exact moment in the video where the answer is discussed. 
+# You-RAG 🎥💬
+### Chat with YouTube Videos Using Retrieval-Augmented Generation
 
-The application processes YouTube video transcripts, generates embeddings, and stores them in a ChromaDB vector store. It then retrieves relevant transcript segments using a retrieval-augmented generation (RAG) approach and provides a direct YouTube link with the exact timestamp for the user's query.
+You-RAG is a Flask-based web application that allows users to ask questions about YouTube videos and receive answers based on their transcripts, along with timestamped links to the relevant moments in the video.
 
-## Features
+## 📸 Screenshots
 
-- **YouTube Transcript Processing:** Automatically downloads and processes the transcript for a given YouTube video ID.
-- **Question-Answering:** Accepts user questions and retrieves the most relevant segment from the video transcript.
-- **Timestamped YouTube Links:** Provides a direct link to the point in the video where the answer is discussed.
-- **ChromaDB Integration:** Uses ChromaDB as the vector store to store and retrieve embeddings.
-- **Embed Model:** Utilizes the FastEmbedEmbeddings model to create embeddings for transcript chunks.
-- **Language Model:** Integrates with ChatGroq (Llama3-70b-8192) for generating the answer to user queries.
+### 1. Application Interface
+![Application Interface](screenshots/Screenshot%202026-10-13%20230949.png)
 
-> 📝 **Photo Prompt:** Romanticism painting of happy man talking to a video on a laptop
-> **Created with:** [Imagen 3](https://deepmind.google/technologies/imagen-3/)
+### 2. Video Processing and Chat
+![Video Processing and Chat](screenshots/Screenshot%202026-10-13%20231250.png)
 
-## Project Structure
+### 3. Question Answering
+![Question Answering](screenshots/Screenshot%202026-10-13%20231353.png)
 
+## ✨ Features
+
+- **YouTube Video Q&A:** Ask questions about a video's content.
+- **Transcript-Based Answers:** Uses video transcripts to find relevant information.
+- **Timestamped Links:** Get links to relevant moments in the video.
+- **Semantic Search:** Retrieves relevant transcript chunks based on your question.
+- **Conversational Interface:** Interact with video content through a simple web interface.
+
+## 🛠️ Tech Stack
+
+- **Python** — Application logic
+- **Flask** — Web framework
+- **LangChain** — RAG pipeline and language model integration
+- **ChromaDB** — Vector database for storing and retrieving transcript embeddings
+- **FastEmbed** — Text embeddings
+- **Groq** — Language model inference
+- **HTML, CSS, JavaScript** — Frontend
+
+## ⚙️ Prerequisites
+
+Before running the project, make sure you have:
+
+- Python 3.10 or a compatible version
+- Git
+- A Groq API key
+
+## 🚀 Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/advin2321/you-rag.git
+cd you-rag
 ```
-.
-├── app.py                  # Flask application
-├── embed_upload.py         # Handles YouTube transcript processing and embedding
-├── retrieve_create.py      # Handles the question-answer retrieval and link creation
-├── templates/
-│   └── index.html          # HTML template for the front-end
-├── static/
-│   ├── css/
-│   │   └── styles.css      # CSS for styling the front-end
-│   ├── js/
-│   │   └── script.js       # JavaScript for front-end logic
-│   └── favicon.ico         # Favicon for the website
-├── chromadb/               # Directory where ChromaDB vector store is stored
-├── .env                    # Environment variables for API keys and configurations
-└── Dockerfile              # Dockerfile for containerizing the application
+
+### 2. Create a Virtual Environment
+
+**Windows:**
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
 ```
 
-## Getting Started
+**macOS/Linux:**
 
-### Installation
+```bash
+python -m venv venv
+source venv/bin/activate
+```
 
-1. **Clone the repository:**
+### 3. Install Dependencies
 
-   ```bash
-   git clone https://github.com/cloud-ray/youtube-rag.git
-   cd youtube-rag
-   ```
+```bash
+pip install -r requirements.txt
+```
 
-2. **Install dependencies:**
+### 4. Configure Environment Variables
 
-   Create and activate a virtual environment (optional but recommended):
+Create a `.env` file in the project root and add the environment variables required by the application.
 
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
+For example:
 
-   Install the required Python packages:
+```env
+GROQ_API_KEY=your_groq_api_key
+GROQ_MODEL=your_groq_model
+```
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+Add any other environment variables required by your local configuration. Never commit your actual API keys or secrets to GitHub.
 
-3. **Set up environment variables:**
+### 5. Run the Application
 
-   Create a `.env` file in the root directory of the project and add your API keys:
+Start the Flask application using the command configured in your project. For example, if the entry-point file is `app.py`:
 
-   ```bash
-   GROQ_API_KEY=<your-groq-api-key>
-   GROQ_MODEL=openai/gpt-oss-20b
-   LANGSMITH_TRACING=<your-langsmith-tracing>
-   LANGCHAIN_ENDPOINT=<your-langchain-endpoint>
-   LANGCHAIN_API_KEY=<your-langchain-api-key>
-   LANGCHAIN_PROJECT=<your-langchain-project>
-   ```
+```bash
+python app.py
+```
 
-### Running the Application
+Open the local URL shown in the terminal. If the application runs on port `8080`, visit:
 
-1. **Run the Flask application:**
+http://localhost:8080
 
-   ```bash
-   python app.py
-   ```
+## 🔄 How It Works
 
-2. **Access the application:**
+1. The application obtains the transcript of a YouTube video.
+2. The transcript is divided into smaller text chunks.
+3. FastEmbed generates embeddings for the chunks.
+4. ChromaDB stores the embeddings for semantic retrieval.
+5. When a user asks a question, relevant transcript chunks are retrieved.
+6. The language model generates an answer using the retrieved context.
+7. The response includes timestamped links to relevant parts of the video.
 
-   Open your web browser and go to `http://localhost:8080`.
+## 🔐 Environment Variables
 
-## Usage
+Keep your API keys and other secrets in a local `.env` file. Ensure `.env` is listed in `.gitignore` so sensitive credentials are not pushed to the repository.
 
-- Enter the YouTube video ID and your question in the provided form.
-- Click "Get the Answer" to receive the timestamped link to the answer in the video.
+## 👨‍💻 Author
 
-## Future Improvements
+**Sarthak Kumar**
 
-- Implement user authentication and session management.
-- Add support for processing multiple languages.
-- Find a different solution for accessing YouTube transcripts.
+GitHub: [advin2321](https://github.com/advin2321)
 
-## Contributing
+---
 
-Contributions are welcome! Please submit a pull request or open an issue to discuss potential changes.
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more details.
-
-## Contact
-
-For any questions or comments, please contact [Ray](https://www.linkedin.com/in/raymond-fuorry).
+Built with Python, LangChain, ChromaDB, and Groq.
