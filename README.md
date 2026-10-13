@@ -4,13 +4,15 @@
 
 You-RAG is a Flask-based web application that allows users to ask questions about YouTube videos and receive transcript-based answers with timestamped links to relevant moments in the video.
 
+
 ## 📸 Screenshots
 
 ![You-RAG Screenshot 1](screenshots/Screenshot%202026-10-13%20230949.png)
 
-![You-RAG Screenshot 2](Screenshot 2026-10-13 233526.png)
+![You-RAG Screenshot 2](screenshots/Screenshot%202026-10-13%20233526.png)
 
-![You-RAG Screenshot 3](Screenshot 2026-10-13 233423.png)
+![You-RAG Screenshot 3](screenshots/Screenshot%202026-10-13%20233423.png)
+
 
 ## ✨ Features
 
