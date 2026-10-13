@@ -7,17 +7,11 @@ from langchain_core.output_parsers import JsonOutputParser
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.prompts import PromptTemplate
-from langchain import hub
 from dotenv import load_dotenv
 
 load_dotenv()
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-LANGCHAIN_TRACING_V2 = os.getenv('LANGSMITH_TRACING')
-LANGCHAIN_ENDPOINT = os.getenv('LANGCHAIN_ENDPOINT')
-LANGCHAIN_API_KEY = os.getenv('LANGSMITH_API_KEY')
-LANGCHAIN_PROJECT = os.getenv('LANGCHAIN_PROJECT')
 
 # VisionTaskOutput class definition
 class VisionTaskOutput(BaseModel):
@@ -34,8 +28,8 @@ def create_youtube_link(video_id, timestamp):
 # Function to initialize the language model
 def initialize_llm():
     return ChatGroq(
-        model="llama3-70b-8192",
-        temperature=0.5,
+        model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
+        temperature=0,
         api_key=os.getenv('GROQ_API_KEY')
     )
 
@@ -57,9 +51,10 @@ def initialize_vector_store(chromadb_path="chromadb/"):
     return vector_store
 
 # Function to set up the retriever from the vector store
-def initialize_retriever(vector_store):
+def initialize_retriever(vector_store, video_id):
     return vector_store.as_retriever(
-        search_type="mmr", search_kwargs={"k": 3, "fetch_k": 5}
+        search_type="mmr",
+        search_kwargs={"k": 3, "fetch_k": 5, "filter": {"video_id": video_id}}
     )
 
 # Function to define the prompt template
@@ -72,22 +67,16 @@ def initialize_retriever(vector_store):
 #     )
 
 def create_prompt_template():
-    # Fetch the prompt object from the hub
-    prompt_object = hub.pull("cloudray/youtube-rag")
-
-    # Extract the PromptTemplate from the messages list
-    prompt_template = prompt_object.messages[0].prompt
-
-    # Extract the template string
-    template_string = prompt_template.template
-
-    # Print type and content for debugging
-    print("Type of template_string:", type(template_string))
-    print("Content of template_string:", template_string)
-    
-    # Define the PromptTemplate with the fetched template string and additional variables
     return PromptTemplate(
-        template=template_string,
+        template=(
+            "Answer the question using only the supplied transcript excerpts. "
+            "Choose the excerpt whose start time best supports the answer. "
+            "If the excerpts do not answer the question, say so and still use the "
+            "most relevant excerpt's start time.\n\n"
+            "Transcript excerpts (text, metadata): {context}\n\n"
+            "Question: {question}\n"
+            "{format_instructions}"
+        ),
         input_variables=["question", "context"],
         partial_variables={
             "format_instructions": JsonOutputParser(pydantic_object=VisionTaskOutput).get_format_instructions()
@@ -127,7 +116,7 @@ def generate_youtube_link(user_question, original_video_id):
     
     llm = initialize_llm()
     vector_store = initialize_vector_store()
-    retriever = initialize_retriever(vector_store)
+    retriever = initialize_retriever(vector_store, original_video_id)
     prompt_template = create_prompt_template()
     
     output = run_rag_chain(user_question, retriever, prompt_template, llm, original_video_id)

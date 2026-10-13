@@ -113,12 +113,11 @@ typing-inspect==0.9.0
 typing_extensions==4.12.2
 urllib3==2.2.2
 uvicorn==0.30.6
-uvloop==0.20.0
 watchfiles==0.23.0
 websocket-client==1.8.0
 websockets==13.0
 Werkzeug==3.0.4
 wrapt==1.16.0
 yarl==1.9.4
-youtube-transcript-api==0.6.2
+youtube-transcript-api==1.2.4
 zipp==3.20.0

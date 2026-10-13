@@ -28,7 +28,7 @@ def initialize_vector_store(chromadb_path="chromadb/"):
 def get_combined_transcript(video_id, chunk_size=10):
     try:
         print(f"Fetching transcript for video_id: {video_id}...")
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = YouTubeTranscriptApi().fetch(video_id).to_raw_data()
         print(f"Transcript fetched. Total chunks to create: {len(transcript) // chunk_size + 1}")
         
         combined_transcript = [
@@ -76,7 +76,7 @@ def embeddings_exist(video_id, vector_store):
 def add_transcript_to_chroma(video_id, vector_store, chunk_size=10):
     combined_transcript = get_combined_transcript(video_id, chunk_size)
     if combined_transcript is None:
-        return
+        return False
     
     documents = []
     for i, combined_item in enumerate(combined_transcript):
@@ -98,6 +98,7 @@ def add_transcript_to_chroma(video_id, vector_store, chunk_size=10):
     print(f"Adding {len(documents)} documents to the ChromaDB vector store...")
     vector_store.add_documents(documents=documents)
     print("Documents successfully added to the vector store.")
+    return True
 
 # Main function to run the entire process
 def process_video_transcript(video_id, chromadb_path="chromadb/", chunk_size=10):
@@ -105,8 +106,10 @@ def process_video_transcript(video_id, chromadb_path="chromadb/", chunk_size=10)
     
     if embeddings_exist(video_id, vector_store):
         print(f"Embeddings already exist for video_id: {video_id}. Skipping processing.")
-    else:
-        add_transcript_to_chroma(video_id, vector_store, chunk_size)
+        return vector_store
+
+    if not add_transcript_to_chroma(video_id, vector_store, chunk_size):
+        return None
     
     return vector_store
 

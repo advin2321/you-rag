@@ -1,5 +1,9 @@
 .rag-env
+venv/
 chromadb/*
 scrap/
 .env
 __pycache__/
+.env.*
+!.env.example
+*.log

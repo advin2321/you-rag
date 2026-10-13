@@ -10,7 +10,7 @@ document.getElementById('queryForm').addEventListener('submit', function(event) 
     const video_id = document.getElementById('video_id').value;
     const user_question = document.getElementById('user_question').value;
 
-    fetch('https://youtube-rag-dhiw.onrender.com/process', {
+    fetch('/process', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -29,14 +29,26 @@ document.getElementById('queryForm').addEventListener('submit', function(event) 
                 <p><strong>View on YouTube ↗️</strong> <a href="${data.youtube_link}" target="_blank">${data.youtube_link}</a></p>
             `;
 
-            // Update the iframe source URL with the start parameter
-            const iframeSrc = `https://www.youtube.com/embed/${video_id}?start=${data.start}`;
+            // Use the normalized ID returned by the server. This also supports a
+            // full YouTube URL pasted into the form.
+            const iframeVideoId = data.video_id || video_id;
+            const iframeParams = new URLSearchParams({
+                start: data.start,
+                origin: window.location.origin,
+            });
+            const iframeSrc = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(iframeVideoId)}?${iframeParams}`;
 
             // Log the iframe source URL to the console
             console.log('Iframe Source URL:', iframeSrc);
 
             document.getElementById('videoContainer').innerHTML = `
-                <iframe src="${iframeSrc}" allowfullscreen></iframe>
+                <iframe
+                    src="${iframeSrc}"
+                    title="YouTube video player"
+                    referrerpolicy="strict-origin-when-cross-origin"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowfullscreen>
+                </iframe>
             `;
         } else {
             document.getElementById('response').innerHTML = `

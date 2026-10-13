@@ -69,6 +69,7 @@ The application processes YouTube video transcripts, generates embeddings, and s
 
    ```bash
    GROQ_API_KEY=<your-groq-api-key>
+   GROQ_MODEL=openai/gpt-oss-20b
    LANGSMITH_TRACING=<your-langsmith-tracing>
    LANGCHAIN_ENDPOINT=<your-langchain-endpoint>
    LANGCHAIN_API_KEY=<your-langchain-api-key>

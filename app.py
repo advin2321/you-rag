@@ -3,6 +3,7 @@ from flask_cors import CORS
 from embed_upload import process_video_transcript
 from retrieve_create import generate_youtube_link
 import logging
+from urllib.parse import parse_qs, urlparse
 
 app = Flask(__name__)
 # CORS(app, resources={r"/process": {"origins": ["http://localhost:8080", "http://127.0.0.1:8080"]}})
@@ -23,6 +24,28 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 
+def extract_video_id(video_input):
+    """Accept a YouTube video ID or a standard YouTube URL."""
+    value = (video_input or "").strip()
+    if not value:
+        return None
+
+    parsed = urlparse(value)
+    if not parsed.scheme and not parsed.netloc:
+        return value
+
+    host = parsed.netloc.lower().removeprefix("www.")
+    if host == "youtu.be":
+        return parsed.path.strip("/").split("/")[0] or None
+    if host in {"youtube.com", "m.youtube.com"}:
+        if parsed.path == "/watch":
+            return parse_qs(parsed.query).get("v", [None])[0]
+        parts = parsed.path.strip("/").split("/")
+        if len(parts) >= 2 and parts[0] in {"embed", "shorts", "live"}:
+            return parts[1]
+    return value
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -30,7 +53,7 @@ def index():
 @app.route('/process', methods=['POST'])
 def process_request():
     data = request.json
-    video_id = data.get('video_id')
+    video_id = extract_video_id(data.get('video_id'))
     user_question = data.get('user_question')
 
     if not video_id or not user_question:
@@ -48,6 +71,7 @@ def process_request():
 
         # Ensure result contains the expected keys
         if 'youtube_link' in result and 'answer' in result:
+            result['video_id'] = video_id
             return jsonify(result)
         else:
             logger.error("Unable to generate YouTube link or retrieve answer.")
